@@ -120,7 +120,7 @@ and images.
 
 * `docker pull ubuntu:latest`
 
-* **Observe**: Watch the download process.
+* **Observe:** Watch the download process.
 
 * Verify it's downloaded: `docker images`
 
@@ -146,18 +146,42 @@ and images.
 
 * `docker rmi ubuntu:latest`
 
-* **Observe**: What is the output?
+* **Observe:** What is the output?
 
 * Verify it's removed: `docker images`
 
-## Exercise 5: Port Mapping - Making Container Services Accessible
+## Exercise 5: Interacting with running containers
+**Objective:** Learn how to interact with containers running in the background. We already learned how to list them and
+see their logs, now we will enable us to attach to them and further understand their current state. 
+### 1. Rerun the simple Ngninx
+* `docker run -d --name my-nginx nginx`
+* Make sure it is running as expected with `docker ps -f "name=my-nginx"`
+### 2. Attach to the container
+* Make a command that extracts user information directly from the running container:
+   * `docker exec my-nginx getent passwd | awk -F: '{ print $1}'`
+   *  **Explanation:**
+     * `exec` is the docker command that lets us attach to a background container
+     * `getent passwd | awk -F: '{ print $1}'` is the command we want to be executed inside the container, in this case
+       called `my-nginx`. This command extracts user-information inside the container OS and prints the usernames part, 
+       through the `awk` command.  
+
+* Now attach to the container with the `bash` command:
+   * `docker exec -it my-nginx bash`
+   * **Explanation:**
+     * The `-it` flags we used previously can be combine `exec` to attach interactively with the background container.
+     * `bash` (the terminal) is the command we execute on the container.
+
+* Run `curl localhost`
+* **Observe:** What are looking at? what are the implications?
+
+## Exercise 6: Port Mapping - Making Container Services Accessible
 **Objective**: Expose a container's service to your host machine.
 
 ### 1. Run an Nginx container and map its port:
 
 *  `docker run -d --name my-web-server -p 8080:80 nginx`
 
-*  **Explanation**:
+*  **Explanation:**
    * `-p 8080:80`: Maps port `8080` on your host machine to port `80` inside the container.
 
 * **Observe**: What is the output?
@@ -177,7 +201,7 @@ and images.
 *  `docker stop my-web-server`
 *  `docker rm my-web-server`
 
-## Exercise 6: Volumes - Configuring and Observing Containers
+## Exercise 7: Volumes - Configuring and Observing Containers
 **Objective**: Understanding how volumes can be used as external interface for the application inside a container.
 
 Volumes have many purposes including detached storage, but can also be a powerful mechanism for interacting with 
@@ -227,10 +251,12 @@ replaceable, which is crucial for scalable and manageable setups.
   * **Expected**: You should see "Hello from Custom Config". This confirms the container is using your external configuration.
 ### 6. Modify the configuration and observe:
 * Overwrite the existing Nginx configuration file on your host:
-  * `echo "server { listen 80; location / { return 200 'Config updated'; } }" > ~/nginx-conf/custom.conf`
+  * `echo "server { listen 80; location / { return 200 'Config updated\n'; } }" > ~/nginx-conf/custom.conf`
 * Access the Nginx server from your terminal with `curl http://localhost:8082`
+  * **Observe:** Is the response as expected?
 
-* **Observe:** What is the response now?
+* Restart the container with `docker restart custom-conf-nginx`
+  * **Observe:** What is the output from `curl http://localhost:8082`?
 
 ### 7. Nginx clean up:
 
@@ -249,14 +275,14 @@ machine. This demonstrates how to retrieve output from a container for analysis 
 
   * `mkdir -p ~/app-logs`
 
-* Run a simple `alpine/git` container that writes to a log file, mounting the log directory:
+* Run a simple `alpine` container that writes to a log file, mounting the log directory:
 
   * ```shell
-    docker run -d --name log-generator -v ~/app-logs:/app/logs alpine/git \
-        sh -c "while true; do echo 'Log entry from container: $(date)' >> /app/logs/app.log; sleep 1; done"
+    docker run -d --name log-generator -v ~/app-logs:/app/logs alpine \
+        sh -c 'while true; do time echo "[$(date +"%F %H:%M:%S")] Log entry from container" >> /app/logs/app.log; sleep 1; done'
     ```
 
-  * **Explanation**: This command runs a simple shell script inside an `alpine/git` container. The script continuously
+  * **Explanation**: This command runs a simple shell script inside an `alpine` container. The script continuously
     writes timestamped messages to `app.log` within the `/app/logs` directory, which is mounted from your host's 
     `~/app-logs`.
 
@@ -275,7 +301,7 @@ machine. This demonstrates how to retrieve output from a container for analysis 
 
 * `rm -rf ~/app-logs` (removes the log directory and its contents from your host)
 
-## Exercise 7: Building Custom Images with Dockerfile (Introduction)
+## Exercise 8: Building Custom Images with Dockerfile
 **Objective**: Understand the basics of creating your own Docker images and how you can enhance security by running
 applications inside containers with non-privileged users.
 ### 1. Basic image building:
@@ -292,7 +318,7 @@ applications inside containers with non-privileged users.
 
      * `echo "<h1>My Custom Web App</h1>" > index.html`
 
-  3. Create a Dockerfile:
+  3. Create a `Dockerfile`:
 
      * Using your preferred text editor (e.g., nano Dockerfile or vi Dockerfile), add the following content:
        ```Dockerfile
@@ -337,19 +363,53 @@ applications inside containers with non-privileged users.
      * Open your web browser and navigate to http://your-linux-vm-ip:8083.
 
      * **Expected**: You should see "My Custom Web App".
+### 2. Using container registries and tags
+**Objective:** Understanding that container images are essentially distributions. We explore registries as a means to 
+make our containers available for other users. These basic exercises covers pulling and pushing images and how we pick 
+specific versions of the images.
 
-  8. Clean up:
+**Steps:** 
 
-     * `docker stop custom-web`
-
-     * `docker rm custom-web`
-
-     * `docker rmi my-custom-nginx` (you might need to remove the container first if you didn't already)
-
-     * `cd ..`
-
-     * `rm -rf my-app`
-### 2. Running Applications as Non-Privileged Users (Security Best Practice)
+1. Loging into container registries can typically be done with a `docker login -u <user> <registry-address>`, however in
+   our setting we will utilize a registry residing in Microsoft Azure, so our commands will be as follows:
+    1. `az login --identity`
+    2. `az acr login --name <registry-name>.azurecr.io`
+2. Before you can push the container image to the registry, the image must be **tagged** accordingly:
+    * `docker build -t <registry-name>.azurecr.io/<username>/my-custom-nginx .`
+    * `docker images`
+    * **Expect:** Shows you multiple images with same `SIZE` but with different `REPOSITORY` 
+      (`<registry-name>.azurecr.io/<username>/my-custom-nginx` and `my-custom-nginx`) and `IMAGE ID`, but with `TAG` is 
+      "latest" for both. 
+    * **Explanation**:
+       * `REPOSITORY` denotes where the image can be found i.e. the container registry `<registry-name>.azurecr.io`, at 
+         path `<username>/my-custom-nginx`.
+       * `TAG` as "latest" is given to an image per default if no tag is defined. We will return to defining tags 
+         explicitly.
+3. `docker push <registry-name>.azurecr.io/<username>/my-custom-nginx`
+    * **Observe:**  Watch the upload process.
+4. To verify that the registry has the container image:
+    * `docker rmi <registry-name>.azurecr.io/<username>/my-custom-nginx`
+    * `docker images`
+       * **Observe:** The image is not listed
+    * `docker pull <registry-name>.azurecr.io/<username>/my-custom-nginx`
+    * `docker images`
+       * **Observe:** The image has returned
+    * `docker rmi <registry-name>.azurecr.io/<username>/my-custom-nginx`
+    * `docker run -d --name my-custom-nginx <registry-name>.azurecr.io/<username>/my-custom-nginx`
+      *  **Observe:** The image is fetched similarly to when we ran `docker run -d --name my-nginx nginx`  
+5. As we utilized the exact same Dockerfile for `my-custom-nginx` and 
+   `<registry-name>.azurecr.io/<username>/my-custom-nginx`, we should align the `IMAGE ID` accordingly:
+   * `docker rmi my-custom-nginx`
+   * `docker tag <registry-name>.azurecr.io/<username>/my-custom-nginx my-custom-nginx`
+   * **Observe:** Using `docker images` should reveal that `IMAGE ID`
+6. **Clean up:** It is time to clean up; utilise your learned commands to get an overview of what you have created and remove the clutter.
+    * **Hint:**
+     * `docker ps -a -f "name=<>"`
+     * `docker stop` 
+     * `docker rm`
+     * `docker images`
+     * `docker rmi`
+### 3. Running Applications as Non-Privileged Users (Security Best Practice)
 * **Goal:** Create a Dockerfile that runs the application inside the container as a dedicated, non-root user. This
   significantly enhances security by limiting the potential impact of a compromise.
 
