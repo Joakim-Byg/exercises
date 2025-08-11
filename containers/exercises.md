@@ -467,7 +467,7 @@ specific versions of the images.
        ```
      * Let's stick with the Nginx example for consistency, but be aware of the port 80 limitation for non-root users.
 
-## Exercise 8: Introduction to Docker Compose (Optional/Simple)
+## Exercise 9: Introduction to Docker Compose (Optional/Simple)
 **Objective**: Understand how to manage multi-container applications with Docker Compose.
 
 * Prerequisite: Ensure Docker Compose is installed on your system (often comes with Docker Desktop or can be installed 
