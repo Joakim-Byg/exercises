@@ -51,7 +51,8 @@ This covers managing software, services, and processes.
   2. `sleep 100 &`
 * **Observe:**
   * What does the terminal indicate?
-  * Use `pstree -p`, where `p` expose the process IDs
+  * Try `ps -ef --forest`
+  * Try `pstree -p`, where `p` expose the process IDs
 
 * Find the PID of `sleep 300 &` sleep command and terminate it using `kill`.
 
