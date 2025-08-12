@@ -73,7 +73,7 @@ Managing users, groups, and permissions.
 * Create a file `project.data`.
 * Use `chmod` to set permissions so that the owner can read/write/execute, the group can read/execute, and others can 
   only read.
-  * Hint: `chmod 754 project.data`
+  * **Hint:** `chmod 754 project.data`
 * Create a directory `project-files`.
 * Change the ownership of this directory to the `root` user and the `developers` group:
   * `sudo chown root:developers project-files`

@@ -426,44 +426,18 @@ specific versions of the images.
        # Use a smaller, more secure base image if possible (e.g., alpine)
        FROM alpine:latest
        
-       # Install Nginx (or your application's dependencies)
-       RUN apk add --no-cache nginx
-       
        # Create a non-root user and group
-       RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+       RUN addgroup -S appgroup && adduser -u 1500 -S appuser -G appgroup
        
-       # Copy your custom content
+       # Copy your custom index.html into the Nginx web root
        COPY index.html /var/www/html/index.html
        
-       # Change ownership of the web root to the non-root user
-       RUN chown -R appuser:appgroup /var/www/html
-       
-       # Set the user for subsequent instructions and runtime
-       USER appuser
-       
-       # Expose port 80 (Nginx default)
-       EXPOSE 80
-       
-       # Command to run Nginx (must be able to run as non-root, often needs specific config)
-       # For Nginx, typically it needs to bind to privileged ports (like 80) as root,
-       # then drop privileges. For simplicity in this example, we assume appuser can serve.
-       # In a real scenario, Nginx would start as root and then switch user.
-       # For this exercise, we'll use a simpler http server that can run as non-root.
-       CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
-       ```
-     * Note on Nginx and Ports: Nginx usually needs root privileges to bind to ports below 1024 (like port 80). For a
-       real production setup, Nginx would start as root, bind to the port, and then drop privileges to a non-root user.
-       For this exercise's simplicity, we are demonstrating the USER instruction. If Nginx fails to start, it's likely
-       due to port binding issues as a non-root user. A simpler alternative for demonstration might be a Python simple
-       HTTP server...
-       ```Dockerfile
-       # ... (previous lines) ...
        # Install Python and change ownership
        RUN apk add --no-cache python3 && chown -R appuser:appgroup /var/www/html
        USER appuser
        WORKDIR /var/www/html
-       EXPOSE 8000
-       CMD ["python3", "-m", "http.server", "8000"]
+       EXPOSE 80
+       CMD ["python3", "-m", "http.server", "80"]
        ```
      * Let's stick with the Nginx example for consistency, but be aware of the port 80 limitation for non-root users.
 
