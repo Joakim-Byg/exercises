@@ -5,9 +5,15 @@ This is about navigating the system and handling files.
 * Find your current directory using `pwd`.
 * List the contents of your home directory (`ls`). Now list them in a long format showing permissions and ownership 
   (`ls -l`). Now include hidden files (`ls -la`).
+  * **Explanation:**
+    * `-l` is for listing
+    * `-a` is for **all**, resulting in displaying additional information about each item and listing 'hidden' subjects. 
 * Create a directory structure: `mkdir -p ~/lfca-practice/scripts`
+  * **Explanation:** `-p` is a flag for "making missing **P**arents" as well as the rightmost folder.  
 * Navigate into the new scripts directory (`cd ~/lfca-practice/scripts`).
 * Navigate back to your home directory using an absolute path, then a relative path (`cd ~`, then `cd ../..`).
+  * Is the location expected?
+* Now use `cd -`, what is your location now?
 
 ## Exercise 1.2: File Manipulation
 
@@ -25,7 +31,7 @@ This is about navigating the system and handling files.
 * Count the lines, words, and characters in the file using `wc`.
 * Search for the word "Linux" in the file using `grep`.
 * Use the `find` command to locate all files in your home directory ending with `.txt`.
-* Pipe the output of `ls -l /etc` into `less` to view it page by page.
+* Pipe (`|`) the output of `ls -l /etc` into `less` to view it page by page.
 * Pipe the output of `ls -l /etc` into `grep cron` to find all files/directories related to cron.
 
 # Module 2: System Administration
