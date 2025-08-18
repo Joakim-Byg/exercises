@@ -363,6 +363,8 @@ applications inside containers with non-privileged users.
      * Open your web browser and navigate to http://your-linux-vm-ip:8083.
 
      * **Expected**: You should see "My Custom Web App".
+  8. To inspect images on this level and at what time the various layers have been added, use `docker history`:
+     * **Expected:** The timing of the layers should fit your latest build time. 
 ### 2. Using container registries and tags
 **Objective:** Understanding that container images are essentially distributions. We explore registries as a means to 
 make our containers available for other users. These basic exercises covers pulling and pushing images and how we pick 
@@ -484,7 +486,7 @@ specific versions of the images.
 
 * `mkdir html`
 
-* `echo "<h1>Hello from Docker Compose!</h1>" > html/index.html`
+* `echo "<h1>Hello from Docker Compose</h1>" > html/index.html`
 
 ### 4. Start your services with Docker Compose:
 

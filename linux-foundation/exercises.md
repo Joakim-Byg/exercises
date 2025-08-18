@@ -81,14 +81,24 @@ Managing users, groups, and permissions.
 # Module 4: Storage
 Managing disks and filesystems. (This may require adding a new virtual disk to your VM).
 ## Exercise 4.1: Partitions and Filesystems
+**Warning:** The last part of this exercise requires a system restart to confirm that the system-changes has taken 
+affect, however if the configuration is malformed, it may cause system failure and inhibit you to perform the last 
+exercises;
+
+**Proceed with caution**
 * List all block devices (`lsblk`).
-* Assuming you've added a new virtual disk (e.g., `/dev/sdb`), use `sudo fdisk /dev/sdb` to create a new primary 
-  partition.
+* Assuming you've added a new virtual disk (e.g., `/dev/sdb` or `/dev/sdc`), use `sudo fdisk /dev/sdb` to create a new 
+  primary partition.
 * Format the new partition with an ext4 filesystem (`sudo mkfs.ext4 /dev/sdb1`).
 * Create a directory `/mnt/data` (`sudo mkdir /mnt/data`).
 * Mount the new filesystem at `/mnt/data` (`sudo mount /dev/sdb1 /mnt/data`).
 * Verify it's mounted with `df -h`.
-* Edit `/etc/fstab` to make the mount permanent. You will need to get the UUID of the partition with `blkid`.
+* Edit `/etc/fstab` to make the mount permanent.
+
+  **Notice**:
+  * You will need to get the UUID of the partition with `blkid`.
+  * the `fstab` format is not the same as the output of `blkid`
+  * `fstab` needs a reference to the device `/dev` (recall that "everything in Linux is a file").
 
 # Module 5: Networking
 Configuring and troubleshooting network connections.
@@ -108,10 +118,7 @@ Configuring and troubleshooting network connections.
   * Allow incoming SSH connections (`sudo ufw allow ssh`).
   * Enable the firewall (`sudo ufw enable`).
 
-
-
-
-# Module 6: Automation with Scripting (NEW)
+# Module 6: Automation with Scripting
 This module introduces basic scripting to automate the various tasks.
 
 ## Exercise 6.1: Bash Scripting - User Onboarding
