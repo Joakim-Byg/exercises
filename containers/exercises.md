@@ -1,29 +1,33 @@
-# Container Management Exercises
-These exercises are designed to give you hands-on experience with Docker, the leading containerization platform. 
-By the end of these exercises, you have had hands on experiences with the essential commands for managing containers 
-and images.
+# Podman Container Management Exercises
+These exercises give you hands-on experience with Podman, a daemonless container engine for running OCI containers and
+images. By the end of these exercises, you will have practiced the essential commands for managing containers and
+images.
+
+> These exercises use rootless Podman where possible. On macOS or Windows, initialize a Podman virtual machine once with
+> `podman machine init`, then start it with `podman machine start`. On an SELinux-enabled Linux host, use the `:Z` or
+> `:z` volume suffixes shown in Exercise 7 so Podman can access bind-mounted files.
 
 ## Exercise 1: Getting Started - Running Your First Container
-**Objective:** Verify Docker installation and run a very basic container.
+**Objective:** Verify Podman and run a very basic container.
 
-### 1. Verify Docker Installation:
+### 1. Verify Podman:
 
 * Open your terminal.
 
-* Type `docker info` and press Enter.
+* Type `podman info` and press Enter.
 
-* **Expected Output:** You should see detailed information about your Docker client and server. If you get an error, 
-  Docker might not be running or installed correctly.
+* **Expected Output:** You should see information about your Podman installation, storage, networking, and runtime. If
+  you get an error, Podman might not be installed or its virtual machine might not be running.
 
-* Type `docker version` and press Enter.
+* Type `podman version` and press Enter.
 
-* **Expected Output:** You should see the client and server versions of Docker.
+* **Expected Output:** You should see the installed Podman version.
 
-### 2. Run the hello-world container:
+### 2. Run the Podman hello container:
 
-* This is a minimal image designed to test your Docker installation.
+* This is a minimal image designed to test your Podman installation.
 
-* `docker run hello-world`
+* `podman run quay.io/podman/hello`
   
 * **Observe:** What message is displayed? What happens to the container after it runs?
 
@@ -34,7 +38,7 @@ and images.
 
 * We'll run an Nginx web server, which will keep running in the background.
 
-* `docker run -d --name my-nginx nginx`
+* `podman run -d --name my-nginx nginx`
 
 * **Explanation:**
 
@@ -42,26 +46,26 @@ and images.
 
   * `--name my-nginx`: Assigns a human-readable name to your container.
 
-  * `nginx`: The name of the Docker image to use.
+  * `nginx`: The name of the Nginx image to use.
 
 * **Observe:** What is the output of this command? (It should be a long string, the container ID).
 
 ### 2. List running containers:
 
-* `docker ps`
+* `podman ps`
 
 * **Observe**: Do you see your my-nginx container listed? Pay attention to its `CONTAINER ID`, `IMAGE`, `COMMAND`, 
   `CREATED`, `STATUS`, `PORTS`, and `NAMES`.
 
 ### 3. View container logs:
 
-* `docker logs my-nginx`
+* `podman logs my-nginx`
   
 * **Observe**: What information do the logs provide? This is useful for debugging.
 
 ### 4. Inspect container details:
 
-* `docker inspect my-nginx`
+* `podman inspect my-nginx`
 
 * **Observe**: Scroll through the extensive JSON output. What kind of detailed information can you find about the 
   container's configuration, network settings, and volumes?
@@ -71,62 +75,67 @@ and images.
 
 ### 1. Stop the my-nginx container:
 
-* `docker stop my-nginx`
+* `podman stop my-nginx`
 
 * **Observe**: What is the output?
 
-* Verify it's stopped: `docker ps` (it should no longer appear in the list of running containers).
+* Verify it's stopped: `podman ps` (it should no longer appear in the list of running containers).
 
 ### 2. List all containers (including stopped ones):
 
-* `docker ps -a`
+* `podman ps -a`
 
 * **Observe**: Now `my-nginx` should appear, but its `STATUS` should indicate it's exited.
 
 ### 3. Remove the my-nginx container:
 
-* `docker rm my-nginx`
+* `podman rm my-nginx`
 
 * **Observe**: What is the output?
 
-* Verify it's removed: `docker ps -a` (it should no longer appear at all).
+* Verify it's removed: `podman ps -a` (it should no longer appear at all).
 
-### 4. Clean up previous `hello-world` containers:
+### 4. Clean up previous Podman hello containers:
 
-* You might have several `hello-world` containers from Exercise 1. They run and exit immediately.
+* You might have several `quay.io/podman/hello` containers from Exercise 1. They run and exit immediately.
 
-* List them: `docker ps -a -f "ancestor=hello-world"`
+* List them: `podman ps -a -f "ancestor=quay.io/podman/hello"`
 
-* Remove them all at once: `docker rm $(docker ps -a -q -f "ancestor=hello-world")`
+* Remove them all at once:
+  ```shell
+  for container_id in $(podman ps -a -q -f "ancestor=quay.io/podman/hello"); do
+      podman rm "$container_id"
+  done
+  ```
 
 * **Explanation**:
 
-  * `docker ps -a -q`: Lists all container IDs, quietly (only the IDs).
+  * `podman ps -a -q`: Lists all container IDs, quietly (only the IDs).
 
-  * `-f "ancestor=hello-world"`: Filters by containers created from the `hello-world` image.
+  * `-f "ancestor=quay.io/podman/hello"`: Filters by containers created from the Podman hello image.
 
-  * `$(...)`: Command substitution, meaning the output of the inner command becomes arguments for the outer command.
+  * The `for` loop removes each matching container and does nothing when there are no matches.
 
-## Exercise 4: Managing Docker Images
+## Exercise 4: Managing Podman Images
 **Objective**: Understand how to pull images and manage them locally.
 
 ### 1. List local images:
 
-* `docker images`
+* `podman images`
 
-* **Observe**: What images do you currently have? (You should see `hello-world` and `nginx`).
+* **Observe**: What images do you currently have? (You should see `quay.io/podman/hello` and `nginx`).
 
 ### 2. Pull a new image (e.g., Ubuntu):
 
-* `docker pull ubuntu:latest`
+* `podman pull ubuntu:latest`
 
 * **Observe:** Watch the download process.
 
-* Verify it's downloaded: `docker images`
+* Verify it's downloaded: `podman images`
 
 ### 3. Run a container from the new image and interact with it:
 
-* `docker run -it ubuntu:latest bash`
+* `podman run -it ubuntu:latest bash`
 
 * **Explanation:**
 
@@ -142,44 +151,47 @@ and images.
 
 ### 4. Remove an image:
 
-* First, ensure no containers are using the image you want to remove (check `docker ps -a`).
+* First, ensure no containers are using the image you want to remove (check `podman ps -a`).
 
-* `docker rmi ubuntu:latest`
+* `podman rmi ubuntu:latest`
 
 * **Observe:** What is the output?
 
-* Verify it's removed: `docker images`
+* Verify it's removed: `podman images`
 
 ## Exercise 5: Interacting with running containers
-**Objective:** Learn how to interact with containers running in the background. We already learned how to list them and
-see their logs, now we will enable us to attach to them and further understand their current state. 
-### 1. Rerun the simple Ngninx
-* `docker run -d --name my-nginx nginx`
-* Make sure it is running as expected with `docker ps -f "name=my-nginx"`
-### 2. Attach to the container
+**Objective:** Learn how to run commands inside containers running in the background.
+### 1. Rerun the simple Nginx
+* `podman run -d --name my-nginx -p 8084:80 nginx`
+* Make sure it is running as expected with `podman ps -f "name=my-nginx"`
+### 2. Run commands inside the container
 * Make a command that extracts user information directly from the running container:
-   * `docker exec my-nginx getent passwd | awk -F: '{ print $1}'`
+   * `podman exec my-nginx getent passwd | awk -F: '{ print $1}'`
    *  **Explanation:**
-     * `exec` is the docker command that lets us attach to a background container
+     * `exec` runs a command inside a running container without replacing its main process.
      * `getent passwd | awk -F: '{ print $1}'` is the command we want to be executed inside the container, in this case
        called `my-nginx`. This command extracts user-information inside the container OS and prints the usernames part, 
        through the `awk` command.  
 
 * Now attach to the container with the `bash` command:
-   * `docker exec -it my-nginx bash`
+   * `podman exec -it my-nginx bash`
    * **Explanation:**
-     * The `-it` flags we used previously can be combine `exec` to attach interactively with the background container.
+     * The `-it` flags create an interactive terminal for the running container.
      * `bash` (the terminal) is the command we execute on the container.
 
-* Run `curl localhost`
-* **Observe:** What are looking at? what are the implications?
+* From the host terminal, run `curl http://localhost:8084`.
+* **Observe:** The container is still running in the background, but its HTTP service is reachable through the
+  published host port. What are the security implications of publishing a port?
+
+### 3. Clean up
+* `podman rm -f my-nginx`
 
 ## Exercise 6: Port Mapping - Making Container Services Accessible
 **Objective**: Expose a container's service to your host machine.
 
 ### 1. Run an Nginx container and map its port:
 
-*  `docker run -d --name my-web-server -p 8080:80 nginx`
+*  `podman run -d --name my-web-server -p 8080:80 nginx`
 
 *  **Explanation:**
    * `-p 8080:80`: Maps port `8080` on your host machine to port `80` inside the container.
@@ -192,41 +204,47 @@ see their logs, now we will enable us to attach to them and further understand t
 
   * **Expected**: You should see the default Nginx welcome page.
 
-### 3. Verify port mapping with docker ps:
+### 3. Verify port mapping with podman:
 
-  *  `docker ps`
-  * **Observe**: Look at the `PORTS` column for `my-web-server`. It should show `0.0.0.0:8080->80/tcp`.
+  *  `podman ps`
+  * `podman port my-web-server 80`
+  * **Observe**: The output should show that host port `8080` forwards to container port `80`.
 
 ### 4. Clean up:
-*  `docker stop my-web-server`
-*  `docker rm my-web-server`
+*  `podman stop my-web-server`
+*  `podman rm my-web-server`
 
 ## Exercise 7: Volumes - Configuring and Observing Containers
-**Objective**: Understanding how volumes can be used as external interface for the application inside a container.
+**Objective**: Use bind mounts as an external interface for an application inside a container.
 
-Volumes have many purposes including detached storage, but can also be a powerful mechanism for interacting with 
-containers, acting as an external interface for both providing 
-input (configuration) and retrieving output (logs, data). This approach keeps your containers stateless and easily 
-replaceable, which is crucial for scalable and manageable setups.
+Bind mounts let you provide input such as configuration files and retrieve output such as logs. This keeps the
+application data outside the container, so the container can be replaced without losing that data.
+
+### SELinux labels for bind mounts
+On an SELinux-enabled Linux host, Podman needs permission to access files mounted from the host. Add `:Z` to a mount
+that belongs to one container. Use `:z` when the same host content is shared by multiple containers.
+
+The examples below use `:Z` because each host directory or file belongs to one container. Podman relabels the mounted
+content automatically. Do not use these options on system directories.
 
 ### 1. Create a directory on your host for Nginx content:
 * `mkdir ~/nginx-html`
 
-* `echo "<h1>Hello from Docker Volume</h1>" > ~/nginx-html/index.html`
+* `echo "<h1>Hello from Podman Volume</h1>" > ~/nginx-html/index.html`
 
 ### 2. Run an Nginx container with a volume mount:
 
-* `docker run -d --name volume-nginx -p 8081:80 -v ~/nginx-html:/usr/share/nginx/html nginx`
+* `podman run -d --name volume-nginx -p 8081:80 -v ~/nginx-html:/usr/share/nginx/html:Z nginx`
 
 * **Explanation:** 
-  * `-v ~/nginx-html:/usr/share/nginx/html` mounts your host directory ~/nginx-html to the container's
+  * `-v ~/nginx-html:/usr/share/nginx/html:Z` mounts your host directory ~/nginx-html to the container's
     Nginx web root directory at `/usr/share/nginx/html`.
 
 ### 3. Access the custom Nginx page: 
 * Either use `curl http://localhost:8081` to see the served content or open your web browser and navigate to the public 
   IP of your environment http://your-linux-vm-ip:8081.
 
-* **Expected:** You should see "Hello from Docker Volume".
+* **Expected:** You should see "Hello from Podman Volume".
 
 ### 4. Modify the host file and observe changes:
 
@@ -242,9 +260,9 @@ replaceable, which is crucial for scalable and manageable setups.
   * `echo "server { listen 80; location / { return 200 'Hello from Custom Config'; } }" > ~/nginx-conf/custom.conf`
     
 * Run an Nginx container, mounting your custom config:
-  * `docker run -d --name custom-conf-nginx -p 8082:80 -v ~/nginx-conf/custom.conf:/etc/nginx/conf.d/default.conf nginx`
+  * `podman run -d --name custom-conf-nginx -p 8082:80 -v ~/nginx-conf/custom.conf:/etc/nginx/conf.d/default.conf:Z nginx`
 
-  * **Explanation**: The `-v ~/nginx-conf/custom.conf:/etc/nginx/conf.d/default.conf` flag mounts your host's 
+  * **Explanation**: The `-v ~/nginx-conf/custom.conf:/etc/nginx/conf.d/default.conf:Z` flag mounts your host's
     `custom.conf` file directly over the default Nginx configuration file inside the container.
 
 * Access the Nginx server from your terminal with `curl http://localhost:8082`
@@ -255,16 +273,19 @@ replaceable, which is crucial for scalable and manageable setups.
 * Access the Nginx server from your terminal with `curl http://localhost:8082`
   * **Observe:** Is the response as expected?
 
-* Restart the container with `docker restart custom-conf-nginx`
+* Restart the container with `podman restart custom-conf-nginx`
   * **Observe:** What is the output from `curl http://localhost:8082`?
 
 ### 7. Nginx clean up:
 
-* `docker stop $(docker ps -a -q -f "name=nginx")`
+* Stop and remove all containers whose names contain `nginx`:
+  ```shell
+  for container_id in $(podman ps -a -q -f "name=nginx"); do
+      podman rm -f "$container_id"
+  done
+  ```
 
-* `docker rm $(docker ps -a -q -f "name=nginx")`
-
-* `rm -rf ~/nginx-*` (removes the directories and its contents)
+* `rm -rf ~/nginx-html ~/nginx-conf` (removes the exercise directories and their contents)
 
 ### 8. Extracting Logs and Output from a Container
 
@@ -278,7 +299,7 @@ machine. This demonstrates how to retrieve output from a container for analysis 
 * Run a simple `alpine` container that writes to a log file, mounting the log directory:
 
   * ```shell
-    docker run -d --name log-generator -v ~/app-logs:/app/logs alpine \
+    podman run -d --name log-generator -v ~/app-logs:/app/logs:Z alpine \
         sh -c 'while true; do time echo "[$(date +"%F %H:%M:%S")] Log entry from container" >> /app/logs/app.log; sleep 1; done'
     ```
 
@@ -295,20 +316,20 @@ machine. This demonstrates how to retrieve output from a container for analysis 
 
 ### 9. Log clean up:
 
-* `docker stop log-generator`
+* `podman stop log-generator`
 
-* `docker rm log-generator`
+* `podman rm log-generator`
 
 * `rm -rf ~/app-logs` (removes the log directory and its contents from your host)
 
-## Exercise 8: Building Custom Images with Dockerfile
-**Objective**: Understand the basics of creating your own Docker images and how you can enhance security by running
+## Exercise 8: Building Custom Images with a Containerfile
+**Objective**: Understand the basics of creating your own Podman images and how you can enhance security by running
 applications inside containers with non-privileged users.
 ### 1. Basic image building:
-* **Goal:** Understand the basics of creating your own Docker images.
+* **Goal:** Understand the basics of creating your own container images.
 
 * **Steps:**
-  1. Create a new directory for your Dockerfile (and change to it):
+  1. Create a new directory for your Containerfile (and change to it):
 
      * `mkdir my-app`
 
@@ -318,10 +339,10 @@ applications inside containers with non-privileged users.
 
      * `echo "<h1>My Custom Web App</h1>" > index.html`
 
-  3. Create a `Dockerfile`:
+  3. Create a `Containerfile`:
 
-     * Using your preferred text editor (e.g., nano Dockerfile or vi Dockerfile), add the following content:
-       ```Dockerfile
+     * Using your preferred text editor (e.g., `nano Containerfile` or `vi Containerfile`), add the following content:
+       ```Containerfile
        # Use an official Nginx image as the base
        FROM nginx:latest
   
@@ -334,51 +355,55 @@ applications inside containers with non-privileged users.
        # Command to run when the container starts (Nginx's default command)
        CMD ["nginx", "-g", "daemon off;"]
        ```
-  4. Build your Docker image:
+  4. Build your image:
 
-     * Make sure you are in the my-app directory (where Dockerfile and index.html are).
+     * Make sure you are in the `my-app` directory, where `Containerfile` and `index.html` are.
      
-       * `docker build -t my-custom-nginx .`
+       * `podman build -t my-custom-nginx .`
        
        * **Explanation:**
          * `-t my-custom-nginx`: Tags your new image with the name `my-custom-nginx`.
          
-         * `.`: Specifies the "build context" (the current directory), where Docker will look for the `Dockerfile` and 
+         * `.`: Specifies the "build context" (the current directory), where Podman will look for the `Containerfile` and
            other files.
          
-       * **Observe**: Watch the build process. Each line in the Dockerfile corresponds to a step.
+       * **Observe**: Watch the build process. Each instruction in the Containerfile corresponds to a build step.
 
   5. Verify your new image:
 
-     * `docker images`
+     * `podman images`
 
      * **Expected:** You should see `my-custom-nginx` listed.
 
   6. Run a container from your custom image:
 
-     * `docker run -d --name custom-web -p 8083:80 my-custom-nginx`
+     * `podman run -d --name custom-web -p 8083:80 my-custom-nginx`
 
   7. Access your custom web app:
 
      * Open your web browser and navigate to http://your-linux-vm-ip:8083.
 
      * **Expected**: You should see "My Custom Web App".
-  8. To inspect images on this level and at what time the various layers have been added, use `docker history`:
+  8. To inspect the image layers and when they were added, use `podman history my-custom-nginx`:
      * **Expected:** The timing of the layers should fit your latest build time. 
 ### 2. Using container registries and tags
-**Objective:** Understanding that container images are essentially distributions. We explore registries as a means to 
-make our containers available for other users. These basic exercises covers pulling and pushing images and how we pick 
-specific versions of the images.
+**Objective:** Understand that container images can be distributed through registries. These exercises cover pulling and
+pushing images and selecting specific image versions.
 
 **Steps:** 
 
-1. Loging into container registries can typically be done with a `docker login -u <user> <registry-address>`, however in
-   our setting we will utilize a registry residing in Microsoft Azure, so our commands will be as follows:
+1. Log in to the Azure Container Registry. The registry name passed to Azure CLI is the short name, not the login server:
     1. `az login --identity`
-    2. `az acr login --name <registry-name>.azurecr.io`
+    2. Get an access token and pass it to Podman:
+       ```shell
+       ACR_TOKEN="$(az acr login --name <registry-name> --expose-token --output tsv --query accessToken)"
+       printf '%s' "$ACR_TOKEN" | podman login <registry-name>.azurecr.io \
+         --username 00000000-0000-0000-0000-000000000000 --password-stdin
+       unset ACR_TOKEN
+       ```
 2. Before you can push the container image to the registry, the image must be **tagged** accordingly:
-    * `docker build -t <registry-name>.azurecr.io/<username>/my-custom-nginx .`
-    * `docker images`
+    * `podman tag my-custom-nginx:latest <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+    * `podman images`
     * **Expect:** Shows you multiple images with same `SIZE` but with different `REPOSITORY` 
       (`<registry-name>.azurecr.io/<username>/my-custom-nginx` and `my-custom-nginx`) and `IMAGE ID`, but with `TAG` is 
       "latest" for both. 
@@ -387,67 +412,71 @@ specific versions of the images.
          path `<username>/my-custom-nginx`.
        * `TAG` as "latest" is given to an image per default if no tag is defined. We will return to defining tags 
          explicitly.
-3. `docker push <registry-name>.azurecr.io/<username>/my-custom-nginx`
+3. `podman push <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
     * **Observe:**  Watch the upload process.
 4. To verify that the registry has the container image:
-    * `docker rmi <registry-name>.azurecr.io/<username>/my-custom-nginx`
-    * `docker images`
+    * `podman rmi <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+    * `podman images`
        * **Observe:** The image is not listed
-    * `docker pull <registry-name>.azurecr.io/<username>/my-custom-nginx`
-    * `docker images`
+    * `podman pull <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+    * `podman images`
        * **Observe:** The image has returned
-    * `docker rmi <registry-name>.azurecr.io/<username>/my-custom-nginx`
-    * `docker run -d --name my-custom-nginx <registry-name>.azurecr.io/<username>/my-custom-nginx`
-      *  **Observe:** The image is fetched similarly to when we ran `docker run -d --name my-nginx nginx`  
-5. As we utilized the exact same Dockerfile for `my-custom-nginx` and 
-   `<registry-name>.azurecr.io/<username>/my-custom-nginx`, we should align the `IMAGE ID` accordingly:
-   * `docker rmi my-custom-nginx`
-   * `docker tag <registry-name>.azurecr.io/<username>/my-custom-nginx my-custom-nginx`
-   * **Observe:** Using `docker images` should reveal that `IMAGE ID`
-6. **Clean up:** It is time to clean up; utilise your learned commands to get an overview of what you have created and remove the clutter.
+    * `podman rmi <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+    * `podman run -d --name registry-nginx <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+      * **Observe:** The image is fetched similarly to when we ran `podman run -d --name my-nginx nginx`.
+5. Stop and remove `registry-nginx`, then compare the local tag with the registry tag:
+   * `podman rm -f registry-nginx`
+   * `podman rmi my-custom-nginx:latest`
+   * `podman tag <registry-name>.azurecr.io/<username>/my-custom-nginx:latest my-custom-nginx:latest`
+   * **Observe:** `podman images` should show the same image ID for both tags.
+6. **Clean up:** Use the commands you have learned to review and remove what you created.
     * **Hint:**
-     * `docker ps -a -f "name=<>"`
-     * `docker stop` 
-     * `docker rm`
-     * `docker images`
-     * `docker rmi`
+      * `podman ps -a -f "name=<>"`
+      * `podman stop`
+      * `podman rm`
+      * `podman images`
+      * `podman rmi`
+    * Remove the container from the basic image-building exercise before continuing:
+      * `podman rm -f custom-web`
 ### 3. Running Applications as Non-Privileged Users (Security Best Practice)
-* **Goal:** Create a Dockerfile that runs the application inside the container as a dedicated, non-root user. This
-  significantly enhances security by limiting the potential impact of a compromise.
+* **Goal:** Create a Containerfile that runs the application inside the container as a dedicated, non-root user. This
+  limits the impact of a compromised application.
 
 * **Steps:**
-  1. Navigate back to your my-app directory (or create a new one):
+  1. Navigate back to your `my-app` directory or create a new one:
 
      * `mkdir -p my-app-secure && cd my-app-secure`
 
      * `echo "<h1>Secure Web App</h1>" > index.html`
-  2. Create a `Dockerfile` for a non-root user:
+  2. Create a `Containerfile` for a non-root user:
 
      * Using your preferred text editor, add the following content:
-       ```Dockerfile
-       # Use a smaller, more secure base image if possible (e.g., alpine)
+       ```Containerfile
        FROM alpine:latest
        
-       # Create a non-root user and group
-       RUN addgroup -S appgroup && adduser -u 1500 -S appuser -G appgroup
-       
-       # Copy your custom index.html into the Nginx web root
+       RUN addgroup -S appgroup && adduser -S -D -H -u 1500 -G appgroup appuser
        COPY index.html /var/www/html/index.html
-       
-       # Install Python and change ownership
        RUN apk add --no-cache python3 && chown -R appuser:appgroup /var/www/html
        USER appuser
        WORKDIR /var/www/html
-       EXPOSE 80
-       CMD ["python3", "-m", "http.server", "80"]
+       EXPOSE 8080
+       CMD ["python3", "-m", "http.server", "8080"]
        ```
-     * Let's stick with the Nginx example for consistency, but be aware of the port 80 limitation for non-root users.
+  3. Build and run the image:
+     * `podman build -t my-secure-app .`
+     * `podman run -d --name secure-web -p 8084:8080 my-secure-app`
+  4. Verify the application and user:
+     * Open `http://localhost:8084` in a browser, or run `curl http://localhost:8084`.
+     * Run `podman exec secure-web id`.
+     * **Expected:** The web page shows "Secure Web App" and the process runs as `appuser`, not `root`.
+  5. Clean up:
+     * `podman rm -f secure-web`
 
-## Exercise 9: Introduction to Docker Compose (Optional/Simple)
-**Objective**: Understand how to manage multi-container applications with Docker Compose.
+## Exercise 9: Introduction to Podman Compose (Optional/Simple)
+**Objective**: Understand how to manage multi-container applications with Podman Compose.
 
-* Prerequisite: Ensure Docker Compose is installed on your system (often comes with Docker Desktop or can be installed 
-  separately).
+* Prerequisite: Install Podman and a Compose provider such as `podman-compose`. The `podman compose` command delegates
+  to an installed Compose provider.
 
 ### 1. Create a new directory for your Compose project:
 
@@ -455,72 +484,61 @@ specific versions of the images.
 
 * `cd my-compose-app`
 
-### 2. Create a `docker-compose.yml` file:
+### 2. Create a `compose.yaml` file:
 
 * This file defines your services (containers) and how they relate.
 
 * Using your preferred text editor, add the following content:
 
   ```yaml
-  version: '3.8' # Specify the Compose file format version
-  
   services:
     web:
       image: nginx:latest
       ports:
         - "8083:80"
       volumes:
-        - ./html:/usr/share/nginx/html # Mount a local 'html' directory
-  
-  # You could add another service here, e.g., a simple Python app
-  # app:
-  #   image: python:3.9-slim-buster
-  #   command: python -m http.server 8000
-  #   ports:
-  #     - "8084:8000"
-  #   volumes:
-  #     - ./python-app:/app
-  #   working_dir: /app
+        - ./html:/usr/share/nginx/html:Z # Relabel the bind mount for SELinux
   ```
 ### 3. Create the `html` directory and an `index.html` file:
 
 * `mkdir html`
 
-* `echo "<h1>Hello from Docker Compose</h1>" > html/index.html`
+* `echo "<h1>Hello from Podman Compose</h1>" > html/index.html`
 
-### 4. Start your services with Docker Compose:
+### 4. Start your services with Podman Compose:
 
 * Make sure you are in the `my-compose-app` directory.
 
-* `docker compose up -d`
+* `podman compose up -d`
 
 * **Explanation**:
 
-  * `up`: Creates and starts the services defined in `docker-compose.yml`.
+  * `up`: Creates and starts the services defined in `compose.yaml`.
 
   * `-d`: Runs the services in detached mode (background).
 
-* **Observe**: Docker Compose will pull images (if not present) and start the containers.
+* **Observe**: Podman Compose will pull images if they are not present and start the containers.
 
 ### 5. Verify running services:
 
-* `docker ps`
+* `podman ps`
 
-* **Expected**: You should see a container named my-compose-app-web-1 (or similar).
+* **Expected**: You should see a container for the `web` service.
 
 ### 6. Access your web server:
 
-* Open your web browser and navigate to http://localhost:8083 (or http://your-linux-vm-ip:8083).
+* Open your web browser and navigate to `http://localhost:8083` or `http://your-linux-vm-ip:8083`.
 
-* **Expected**: You should see "Hello from Docker Compose!".
+* **Expected**: You should see "Hello from Podman Compose!".
 
 ### 7. Stop and remove services:
 
-* `docker compose down`
+* `podman compose down`
 
-* **Explanation**: Stops and removes all containers, networks, and volumes created by `docker compose up`.
+* **Explanation**: Stops and removes the containers and network created by this Compose project. Volumes are kept
+  unless you add the provider's volume-removal option.
 
-* **Observe**: Verify with `docker ps -a` that the containers are gone.
+* **Observe**: Verify with `podman ps -a` that the containers are gone.
 
 ### 8. Clean up:
 
@@ -529,6 +547,5 @@ specific versions of the images.
 * `rm -rf my-compose-app`
 
 ## Conclusion
-These exercises cover the fundamental commands and concepts for managing containers. Practice these commands regularly 
-to build muscle memory and confidence. Remember that the Docker documentation is an excellent resource for more in-depth
-information and advanced topics!
+These exercises cover the fundamental commands and concepts for managing containers with Podman. Practice the commands
+regularly to build confidence, and use the Podman documentation when you need more detail.
