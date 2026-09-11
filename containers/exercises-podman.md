@@ -392,17 +392,17 @@ pushing images and selecting specific image versions.
 
 **Steps:** 
 
-1. Log in to the Azure Container Registry. The registry name passed to Azure CLI is the short name, not the login server:
+1. Log in to the Container Registry. The registry name passed to the CLI is the short name, not the login server:
     1. `az login --identity`
     2. Get an access token and pass it to Podman:
        ```shell
        ACR_TOKEN="$(az acr login --name <registry-name> --expose-token --output tsv --query accessToken)"
-       printf '%s' "$ACR_TOKEN" | podman login <registry-name>.azurecr.io \
-         --username 00000000-0000-0000-0000-000000000000 --password-stdin
+       printf '%s' "$ACR_TOKEN" | podman login your.favorite.registry.io \
+         --username <registry-name> --password-stdin
        unset ACR_TOKEN
        ```
 2. Before you can push the container image to the registry, the image must be **tagged** accordingly:
-    * `podman tag my-custom-nginx:latest <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+    * `podman tag my-custom-nginx:latest <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest`
     * `podman images`
     * **Expect:** Shows you multiple images with same `SIZE` but with different `REPOSITORY` 
       (`<registry-name>.azurecr.io/<username>/my-custom-nginx` and `my-custom-nginx`) and `IMAGE ID`, but with `TAG` is 
@@ -412,17 +412,17 @@ pushing images and selecting specific image versions.
          path `<username>/my-custom-nginx`.
        * `TAG` as "latest" is given to an image per default if no tag is defined. We will return to defining tags 
          explicitly.
-3. `podman push <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+3. `podman push <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest`
     * **Observe:**  Watch the upload process.
 4. To verify that the registry has the container image:
-    * `podman rmi <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+    * `podman rmi <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest`
     * `podman images`
        * **Observe:** The image is not listed
-    * `podman pull <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+    * `podman pull <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest`
     * `podman images`
        * **Observe:** The image has returned
-    * `podman rmi <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
-    * `podman run -d --name registry-nginx <registry-name>.azurecr.io/<username>/my-custom-nginx:latest`
+    * `podman rmi <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest`
+    * `podman run -d --name registry-nginx <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest`
       * **Observe:** The image is fetched similarly to when we ran `podman run -d --name my-nginx nginx`.
 5. Stop and remove `registry-nginx`, then compare the local tag with the registry tag:
    * `podman rm -f registry-nginx`
