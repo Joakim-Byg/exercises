@@ -1,6 +1,10 @@
-# Welcom to the Container Basics session modules
+# Welcome to the Container Basics session modules
 
-This module is divided into two sections: Part 1 "Linux Administration" and Part 2. "Container management".
+This module has two sections: Part 1, Linux Administration, and Part 2, Container Management.
+
+- [Linux Administration exercises](linux-foundation/exercises.md)
+- [Docker Container Management exercises](containers/exercises-docker.md)
+- [Podman Container Management exercises](containers/exercises-podman.md)
 
 ## Part 1. Linux Administration
 To begin with, we should (re)visit some Linux Administration Hands-On Exercises! The goal of this session is to move 
@@ -38,7 +42,7 @@ basic Bash and Python scripting, and show you how to integrate your scripts into
 commands.
 
 
-## Part 2. Container Management
+## Part 2: Docker Container Management
 Welcome to your hands-on journey into Docker and container management! These exercise sessions are designed to give you 
 practical experience with the fundamental commands and concepts. Our main objective is to get familiarity with a set of
 essential operations commonly used when developing, operating and maintaining containers and hopefully preparing you to
@@ -87,3 +91,53 @@ optional exercise provides a basic overview of how to define and run multi-conta
 
 You are encouraged to experiment, ask questions, and explore beyond the exercises. The best way to learn is by doing! 
 Good luck, and enjoy your containerized journey!
+
+## Part 3: Podman Container Management
+
+These exercises build practical experience with Podman and the commands used to run, inspect, publish, configure, build,
+and distribute containers.
+
+On macOS or Windows, initialize a Podman virtual machine once with `podman machine init`, then start it with
+`podman machine start`. The exercises use rootless Podman where possible. On an SELinux-enabled Linux host, use the
+`:Z` or `:z` suffixes on bind mounts as shown in the volume exercise.
+
+### Exercise 1: Getting Started
+
+Verify Podman with `podman info` and `podman version`, then run the Podman hello container.
+
+### Exercise 2: Managing Running Containers
+
+Run Nginx in the background, list running containers, inspect logs, and examine container configuration.
+
+### Exercise 3: Stopping and Removing Containers
+
+Stop and remove containers, inspect stopped containers, and clean up the completed hello-container runs.
+
+### Exercise 4: Managing Podman Images
+
+List local images, pull Ubuntu, start an interactive container, and remove an image.
+
+### Exercise 5: Interacting with Running Containers
+
+Use `podman exec` to run commands inside a background container and access its published HTTP service.
+
+### Exercise 6: Port Mapping
+
+Publish an Nginx service from the container to the host and verify the mapping with `podman port`.
+
+### Exercise 7: Bind Mounts, Configuration, and Logs
+
+Use host directories and files as external input and output. The examples include SELinux-safe `:Z` bind mounts, live
+content updates, custom Nginx configuration, and log collection.
+
+### Exercise 8: Building Custom Images with a Containerfile
+
+Build a custom Nginx image, inspect its layers, push and pull an image through Azure Container Registry, and run an
+application as a non-root user.
+
+### Exercise 9: Podman Compose
+
+Use `podman compose` with a Compose provider to define, start, inspect, and remove a simple multi-container application.
+
+The detailed exercises are designed for learning by doing. Review the expected output, answer the reflection questions,
+and clean up the containers and files created during each exercise.
