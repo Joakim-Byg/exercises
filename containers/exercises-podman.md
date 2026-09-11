@@ -393,8 +393,8 @@ pushing images and selecting specific image versions.
 **Steps:** 
 
 1. Log in to the Container Registry. The registry name passed to the CLI is the short name, not the login server:
-    1. echo "$REG_PASS" | podman login -u <user-name> --password-stdin <registry-name>
-    Security Tip: On macOS, replace 'echo "$REG_PASS"' with pbpaste to pipe the password directly from your clipboard. This prevents you credentials from being exposed in plain text or saved to you shell history file.
+    1. * `echo "$REG_PASS" | podman login -u <user-name> --password-stdin <registry-name>`
+Security Tip: On macOS, replace 'echo "$REG_PASS"' with pbpaste to pipe the password directly from your clipboard. This prevents you credentials from being exposed in plain text or saved to you shell history file.
 2. Before you can push the container image to the registry, the image must be **tagged** accordingly:
     * `podman tag my-custom-nginx:latest <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest`
     * `podman images`
