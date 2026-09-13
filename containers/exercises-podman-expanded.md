@@ -454,33 +454,29 @@ podman history my-custom-nginx
 
 Container registries let you publish and distribute built images across different hosts and deployment environments.
 
-Authenticate and acquire an access token to push to your remote container registry:
+Before pushing an image, you must authenticate to the container registry:
 
 ```bash
-# 1. Log in to your cloud provider CLI
-az login --identity
-
-# 2. Extract an access token and log in via Podman
-ACR_TOKEN="$(az acr login --name myregistry --expose-token --output tsv --query accessToken)"
-printf '%s' "$ACR_TOKEN" | podman login myregistry.azurecr.io \
-  --username 00000000-0000-0000-0000-000000000000 --password-stdin
-unset ACR_TOKEN
+echo "$REG_PASS" | podman login -u <user-name> --password-stdin <registry-name>
 ```
+
+> [!TIP]
+> **Security Tip:** On macOS, you can replace `echo "$REG_PASS"` with `pbpaste` to pipe the password directly from your clipboard. This prevents your credentials from being exposed in plain text in your terminal or saved to your shell history file.
 
 Tag your image with your registry address and namespace path:
 
 ```bash
-podman tag my-custom-nginx:latest myregistry.azurecr.io/myusername/my-custom-nginx:latest
+podman tag my-custom-nginx:latest <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest
 ```
 
 - **`podman tag`** (**podman** **tag**)
   - **What it does:** Creates an alias pointing to a source image ID, allowing you to namespace and version your templates.
   - **Memory hook:** Think of this as creating an alternative name or reference path pointing to your existing local image.
 
-Push the tagged image to your container registry:
+Now, push the tagged image to your container registry:
 
 ```bash
-podman push myregistry.azurecr.io/myusername/my-custom-nginx:latest
+podman push <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest
 ```
 
 - **`podman push`** (**podman** **push**)
@@ -490,16 +486,16 @@ podman push myregistry.azurecr.io/myusername/my-custom-nginx:latest
 Test the published image by deleting your local image and pulling it back down:
 
 ```bash
-podman rmi myregistry.azurecr.io/myusername/my-custom-nginx:latest
-podman pull myregistry.azurecr.io/myusername/my-custom-nginx:latest
-podman run -d --name registry-nginx -p 8083:80 myregistry.azurecr.io/myusername/my-custom-nginx:latest
+podman rmi <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest
+podman pull <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest
+podman run -d --name registry-nginx -p 8083:80 <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest
 ```
 
 To clean up:
 
 ```bash
 podman rm -f custom-web registry-nginx
-podman rmi my-custom-nginx:latest myregistry.azurecr.io/myusername/my-custom-nginx:latest
+podman rmi my-custom-nginx:latest <registry-name>/<registry-project-name>/<username>/my-custom-nginx:latest
 cd ..
 rm -rf my-app
 ```
