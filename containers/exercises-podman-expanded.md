@@ -22,7 +22,7 @@ podman machine init
 podman machine start
 ```
 
-If you are running on an SELinux-enabled Linux host, keep in mind that Podman requires specific volume mount suffixes (`:Z` or `:z`) to allow containers access to files owned by the host system.
+If you are running on an SELinux-enabled Linux host, keep in mind that Podman requires specific volume mount suffixes (`:Z` or `:z`) to allow containers access to files owned by the host system. If you are running on macOS or Windows, these suffixes are not supported and will cause errors.
 
 All command blocks in this chapter assume a local bash or zsh shell on a machine with Podman active.
 
@@ -287,13 +287,19 @@ podman rm my-web-server
 
 When a container process is deleted, its writable filesystem layer is destroyed along with it. To preserve files permanently or inject configuration from your host machine, you must configure bind mounts.
 
-### Handling SELinux Suffixes
+### Volume Mount Options and Platform Differences
 
-On systems where SELinux is active (such as Red Hat, Fedora, or CentOS), Podman must be granted permission to access host directory files. You do this by appending an SELinux label suffix to your volume mounts:
-- Append `:Z` to flag that the directory is private to a single container. Podman will automatically relabel the host path.
-- Append `:z` if multiple containers share the same host directory.
+> [!NOTE]
+> **If you are running Podman on macOS or Windows, skip this section and omit the `:Z` suffix from all subsequent commands.** These host platforms do not enforce SELinux. Attempting to use `:Z` or `:z` flags on macOS/Windows host mounts will cause container startup to fail with an error (`lsetxattr: operation not supported`) because the shared host filesystem driver cannot apply Linux SELinux labels.
+
+On Linux host systems where SELinux is active (such as Red Hat, Fedora, or CentOS), the kernel blocks containers from reading or writing to files on the host unless you authorize access. You do this by appending an SELinux label suffix to your volume mounts:
+
+- **`:Z` (Private Mount)**: Tells Podman to relabel the host path to be private and unshared. Only this specific container can access the directory.
+- **`:z` (Shared Mount)**: Tells Podman to apply a shared label, allowing multiple distinct containers to access the host directory concurrently.
 
 *Note: Never use these suffixes on system directories.*
+
+Throughout the rest of this chapter, the volume examples include the `:Z` suffix for SELinux compatibility. If you are on macOS or Windows, remember to strip the `:Z` flag from your commands (for example, use `-v ~/nginx-html:/usr/share/nginx/html` instead of `-v ~/nginx-html:/usr/share/nginx/html:Z`).
 
 ### Mounting Host Directories for Content Delivery
 
